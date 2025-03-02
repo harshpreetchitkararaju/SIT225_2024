@@ -1,28 +1,39 @@
-#include <Arduino_LSM6DS3.h>
+#include <ArduinoIoTCloud.h>
+#include <Arduino_ConnectionHandler.h>
+
+// Define your Wi-Fi credentials
+const char SSID[] = "YOUR_WIFI_SSID";
+const char PASS[] = "YOUR_WIFI_PASSWORD";
+
+// Define your sensor variables
+float temperature;
+float humidity;
+
+void initSensor() {
+  // Initialize your sensor here
+  // Example for DHT22:
+  // dht.begin();
+}
+
+void readSensorData() {
+  // Read sensor data and update Cloud variables
+  // Example for DHT22:
+  // temperature = dht.readTemperature();
+  // humidity = dht.readHumidity();
+}
 
 void setup() {
-    Serial.begin(9600);
-    while (!Serial);
+  Serial.begin(9600);
+  initSensor();
 
-    if (!IMU.begin()) {
-        Serial.println("Failed to initialize IMU!");
-        while (1);
-    }
+  // Connect to Arduino IoT Cloud
+  ArduinoCloud.begin(ArduinoIoTPreferredConnection);
+  ArduinoCloud.addProperty(temperature, READ, ON_CHANGE, NULL);
+  ArduinoCloud.addProperty(humidity, READ, ON_CHANGE, NULL);
 }
 
 void loop() {
-    float x, y, z;
-
-    if (IMU.accelerationAvailable()) {
-        IMU.readAcceleration(x, y, z);
-        Serial.print(millis());
-        Serial.print(",");
-        Serial.print(x, 6);
-        Serial.print(",");
-        Serial.print(y, 6);
-        Serial.print(",");
-        Serial.println(z, 6);
-    }
-
-    delay(1000);
+  ArduinoCloud.update();
+  readSensorData();
+  delay(1000); // Adjust delay based on your sampling rate
 }
