@@ -1,27 +1,31 @@
-#include <Arduino_LSM6DS3.h>
+#include "thingProperties.h"
+#include "DHT.h"
+
+#define DHTPIN 2         // Pin where DHT22 is connected
+#define DHTTYPE DHT22    // DHT 22 (AM2302)
+
+DHT dht(DHTPIN, DHTTYPE);
 
 void setup() {
-    Serial.begin(9600);
-    while (!Serial);
+  Serial.begin(9600);
+  delay(1500); 
 
-    if (!IMU.begin()) {
-        Serial.println("Failed to initialize IMU!");
-        while (1);
-    }
+  initProperties();
+  ArduinoCloud.begin(ArduinoIoTPreferredConnection);
+  dht.begin();
+
+  setDebugMessageLevel(2);
+  ArduinoCloud.printDebugInfo();
 }
 
 void loop() {
-    float x, y, z;
+  ArduinoCloud.update();
 
-    if (IMU.gyroscopeAvailable()) {
-        IMU.readGyroscope(x, y, z);
+  float t = dht.readTemperature();
+  float h = dht.readHumidity();
 
-        Serial.print(x, 2);
-        Serial.print(",");
-        Serial.print(y, 2);
-        Serial.print(",");
-        Serial.println(z, 2);
-    }
+  if (!isnan(t)) temperature = t;
+  if (!isnan(h)) humidity = h;
 
-    delay(2000);
+  delay(2000);
 }
